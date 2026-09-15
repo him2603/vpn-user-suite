@@ -35,9 +35,18 @@ function clientIp(): string {
 export const signIn = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => credentialsSchema.parse(input))
   .handler(async ({ data }) => {
-    const { callAgent } = await import("./agent.server");
     const { createSession } = await import("./session.server");
+    const { isDemoUser, checkDemoCredentials } = await import("./demo.server");
 
+    if (isDemoUser(data.username)) {
+      if (!checkDemoCredentials(data.username, data.password)) {
+        throw new Error("Incorrect demo password.");
+      }
+      await createSession(data.username);
+      return { username: data.username };
+    }
+
+    const { callAgent } = await import("./agent.server");
     await callAgent<{ ok: true }>("/v1/auth", {
       username: data.username,
       password: data.password,
