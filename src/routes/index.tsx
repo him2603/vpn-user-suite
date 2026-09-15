@@ -159,6 +159,13 @@ function LoginPage() {
               )}
               Sign in
             </Button>
+
+            <p className="rounded-md border border-dashed bg-muted/40 p-3 text-xs text-muted-foreground">
+              Demo account for testing (sample data only):{" "}
+              <span className="font-mono text-foreground">demo</span> /{" "}
+              <span className="font-mono text-foreground">Demo@12345</span> — leave the
+              authenticator code empty.
+            </p>
           </form>
         </div>
       </section>
