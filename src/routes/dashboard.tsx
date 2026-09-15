@@ -82,7 +82,9 @@ type TotpResult = {
 };
 
 function errorText(error: unknown, fallback: string) {
-  return error instanceof Error && error.message ? error.message : fallback;
+  const message = error instanceof Error ? error.message : "";
+  if (!message || message.startsWith("[")) return fallback;
+  return message;
 }
 
 function Dashboard() {
