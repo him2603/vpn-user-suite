@@ -1,0 +1,22 @@
+# /etc/pam.d/vpnportal
+#
+# PAM stack used ONLY by the VPN Self-Service Portal agent.
+#
+# pam_google_authenticator runs first with forward_pass: the single response
+# sent by the portal is "<password><6-digit code>". The module strips the code,
+# validates it, and forwards the password to pam_unix via use_first_pass.
+#
+# nullok lets a user who has not enrolled yet sign in with the password alone
+# so they can generate their first QR code. Remove nullok once every user is
+# enrolled to make the second factor mandatory.
+
+auth       required     pam_google_authenticator.so forward_pass nullok
+auth       required     pam_faillock.so preauth silent deny=5 unlock_time=900
+auth       required     pam_unix.so use_first_pass
+auth       [default=die] pam_faillock.so authfail deny=5 unlock_time=900
+
+account    required     pam_faillock.so
+account    required     pam_unix.so
+account    required     pam_nologin.so
+
+session    required     pam_permit.so

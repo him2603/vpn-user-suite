@@ -1,0 +1,38 @@
+[Unit]
+Description=VPN Self-Service Portal helper agent
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# Root is required to read PAM shadow data and to write ~/.google_authenticator
+# files owned by each user. Everything else is locked down below.
+User=root
+Group=root
+EnvironmentFile=/etc/vpn-portal-agent/agent.env
+WorkingDirectory=/opt/vpn-portal-agent
+ExecStart=/opt/vpn-portal-agent/venv/bin/uvicorn vpn_portal_agent:app \
+    --host 127.0.0.1 --port 8787 --proxy-headers --forwarded-allow-ips 127.0.0.1 \
+    --no-server-header --log-level info
+Restart=on-failure
+RestartSec=3
+
+# --- hardening ---
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ReadWritePaths=/var/lib/vpn-portal-agent /home
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictRealtime=yes
+RestrictNamespaces=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+MemoryDenyWriteExecute=yes
+LockPersonality=yes
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target
