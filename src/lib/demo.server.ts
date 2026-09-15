@@ -74,7 +74,7 @@ export function demoProfileInfo() {
 export function demoOvpnFile(): { filename: string; content: string } {
   return {
     filename: `${DEMO_USERNAME}.ovpn`,
-    content: `# Sample OpenVPN client profile (demo mode - not a working配置)
+    content: `# Sample OpenVPN client profile (demo mode - not a working config)
 client
 dev tun
 proto udp
