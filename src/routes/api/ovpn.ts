@@ -11,9 +11,23 @@ export const Route = createFileRoute("/api/ovpn")({
       GET: async ({ request }) => {
         const { getSessionUser } = await import("@/lib/session.server");
         const { callAgent, AgentError } = await import("@/lib/agent.server");
+        const { isDemoUser, demoOvpnFile } = await import("@/lib/demo.server");
 
         const user = await getSessionUser(request.headers.get("cookie"));
         if (!user) return new Response("Unauthorized", { status: 401 });
+
+        if (isDemoUser(user.username)) {
+          const demo = demoOvpnFile();
+          return new Response(demo.content, {
+            headers: {
+              "content-type": "application/x-openvpn-profile",
+              "content-disposition": `attachment; filename="${demo.filename}"`,
+              "cache-control": "no-store",
+              "x-content-type-options": "nosniff",
+            },
+          });
+        }
+
 
         const ip = (request.headers.get("x-forwarded-for") ?? "").split(",")[0]?.trim() || "unknown";
 
