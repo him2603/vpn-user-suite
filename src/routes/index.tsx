@@ -50,12 +50,14 @@ function LoginPage() {
     },
   });
 
-  const errorMessage =
-    mutation.error instanceof Error
-      ? mutation.error.message
-      : mutation.error
-        ? "Sign in failed."
-        : null;
+  const errorMessage = (() => {
+    if (!mutation.error) return null;
+    const message = mutation.error instanceof Error ? mutation.error.message : "";
+    // Zod validation failures surface as JSON; show a friendly message instead.
+    if (!message || message.startsWith("[")) return "Please check your details and try again.";
+    return message;
+  })();
+
 
   return (
     <main className="grid min-h-screen lg:grid-cols-[1.1fr_1fr]">
