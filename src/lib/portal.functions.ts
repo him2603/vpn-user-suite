@@ -73,10 +73,12 @@ export const me = createServerFn({ method: "GET" }).handler(async () => {
 export const getTotp = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => z.object({ regenerate: z.boolean() }).parse(input))
   .handler(async ({ data }) => {
-    const { callAgent } = await import("./agent.server");
     const { requireSessionUser } = await import("./session.server");
+    const { isDemoUser, demoTotp } = await import("./demo.server");
     const user = await requireSessionUser();
+    if (isDemoUser(user.username)) return demoTotp(data.regenerate);
 
+    const { callAgent } = await import("./agent.server");
     return await callAgent<{
       exists: boolean;
       secret: string | null;
@@ -89,10 +91,12 @@ export const getTotp = createServerFn({ method: "POST" })
   });
 
 export const getHistory = createServerFn({ method: "GET" }).handler(async () => {
-  const { callAgent } = await import("./agent.server");
   const { requireSessionUser } = await import("./session.server");
+  const { isDemoUser, demoHistory } = await import("./demo.server");
   const user = await requireSessionUser();
+  if (isDemoUser(user.username)) return demoHistory();
 
+  const { callAgent } = await import("./agent.server");
   return await callAgent<{ events: HistoryEvent[] }>("/v1/history", {
     username: user.username,
     ip: clientIp(),
@@ -100,10 +104,12 @@ export const getHistory = createServerFn({ method: "GET" }).handler(async () => 
 });
 
 export const getClientProfileInfo = createServerFn({ method: "GET" }).handler(async () => {
-  const { callAgent } = await import("./agent.server");
   const { requireSessionUser } = await import("./session.server");
+  const { isDemoUser, demoProfileInfo } = await import("./demo.server");
   const user = await requireSessionUser();
+  if (isDemoUser(user.username)) return demoProfileInfo();
 
+  const { callAgent } = await import("./agent.server");
   return await callAgent<{ available: boolean; size_bytes: number; modified_at: string | null }>(
     "/v1/ovpn/info",
     { username: user.username, ip: clientIp() },
