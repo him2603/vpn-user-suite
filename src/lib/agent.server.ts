@@ -7,6 +7,13 @@
  * 60 second window and rejects reused nonces).
  */
 
+// LAN-only: allow self-signed certificates on the agent's HTTPS endpoint.
+// Set VPN_AGENT_INSECURE_TLS=1 in .env when the agent uses a self-signed cert
+// (e.g. https://172.16.0.146). Has no effect on Cloudflare Workers.
+if (process.env["VPN_AGENT_INSECURE_TLS"] === "1") {
+  process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
+}
+
 type AgentConfig = { baseUrl: string; secret: string };
 
 function readConfig(): AgentConfig {
